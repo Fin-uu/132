@@ -6,7 +6,7 @@ import os
 from functools import partial
 
 import pandas as pd
-
+import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import ray
@@ -291,31 +291,53 @@ def main_worker(args):
 
         
         # make df
+        # Convert lists to numpy arrays and ensure correct shape
+        tt_dc_vals = np.array(tt_dc_vals)
+        tt_iou_vals = np.array(tt_iou_vals)
+        inf_dc_vals = np.array(inf_dc_vals)
+        inf_iou_vals = np.array(inf_iou_vals)
+        inf_sensitivity_vals = np.array(inf_sensitivity_vals)
+        inf_specificity_vals = np.array(inf_specificity_vals)
+
+        # Reshape if necessary
+        if len(tt_dc_vals.shape) == 1:
+            tt_dc_vals = tt_dc_vals.reshape(-1, 1)
+        if len(tt_iou_vals.shape) == 1:
+            tt_iou_vals = tt_iou_vals.reshape(-1, 1)
+        if len(inf_dc_vals.shape) == 1:
+            inf_dc_vals = inf_dc_vals.reshape(-1, 1)
+        if len(inf_iou_vals.shape) == 1:
+            inf_iou_vals = inf_iou_vals.reshape(-1, 1)
+        if len(inf_sensitivity_vals.shape) == 1:
+            inf_sensitivity_vals = inf_sensitivity_vals.reshape(-1, 1)
+        if len(inf_specificity_vals.shape) == 1:
+            inf_specificity_vals = inf_specificity_vals.reshape(-1, 1)
+
+        # Create DataFrames
         eval_tt_dice_val_df = pd.DataFrame(
             tt_dc_vals,
-            columns=[f'tt_dice{n}' for n in label_names]
+            columns=[f'tt_dice{n}' for n in label_names[:tt_dc_vals.shape[1]]]
         )
         eval_tt_iou_val_df = pd.DataFrame(
             tt_iou_vals,
-            columns=[f'tt_iou{n}' for n in label_names]
+            columns=[f'tt_iou{n}' for n in label_names[:tt_iou_vals.shape[1]]]
         )
-        
         
         eval_inf_dice_val_df = pd.DataFrame(
             inf_dc_vals,
-            columns=[f'inf_dice{n}' for n in label_names]
+            columns=[f'inf_dice{n}' for n in label_names[:inf_dc_vals.shape[1]]]
         )
         eval_inf_iou_val_df = pd.DataFrame(
             inf_iou_vals,
-            columns=[f'inf_iou{n}' for n in label_names]
+            columns=[f'inf_iou{n}' for n in label_names[:inf_iou_vals.shape[1]]]
         )
         eval_inf_sensitivity_val_df = pd.DataFrame(
             inf_sensitivity_vals,
-            columns=[f'inf_sensitivity{n}' for n in label_names]
+            columns=[f'inf_sensitivity{n}' for n in label_names[:inf_sensitivity_vals.shape[1]]]
         )
         eval_inf_specificity_val_df = pd.DataFrame(
             inf_specificity_vals,
-            columns=[f'inf_specificity{n}' for n in label_names]
+            columns=[f'inf_specificity{n}' for n in label_names[:inf_specificity_vals.shape[1]]]
         )
         
         
